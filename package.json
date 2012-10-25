@@ -1,11 +1,11 @@
 {
-    "name": "npm_stats",
-    "description": "get stats straight from the couchdb repo",
+    "name": "npm_search",
+    "description": "Get simple states about NPM straight from the couchdb",
     "version": "0.5.0",
     "author": "Matthew Bergman",
     "keywords": [
         "npm",
-        "stats"
+        "search"
     ],
     "repository": {
         "type": "git",
@@ -15,9 +15,9 @@
     "engines": {
         "node": ">=0.6"
     },
-      "license": "MIT",
-      "dependencies": {
-        "cushion" : 1.x.x
-        },
+    "license": "MIT",
+    "dependencies": {
+        "cushion" : "1.x.x",
     }
+
 }
