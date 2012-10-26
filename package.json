@@ -18,6 +18,8 @@
     "license": "MIT",
     "dependencies": {
         "cushion" : "1.x.x",
+        "date-utils": "0.x.x",
+        "sorted": "0.x.x"
     }
 
 }
