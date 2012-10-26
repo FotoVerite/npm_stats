@@ -1,14 +1,13 @@
-module.exports = function() {
-  var datable = require('date-utils');
-  var sorted = require('sorted');
+var datable = require('date-utils');
+var sorted = require('sorted');
+var registry = new (require('cushion').Connection)('isaacs.iriscouch.com');
 
-  var self = this;
-  var registry = new (require('cushion').Connection)('isaacs.iriscouch.com');
+var npmStats = exports;
 
-  this.registry_data = {};
-  this.sorted_by_date = [];
+npmStats.registry_data = {};
 
-  this.queryDatabase = function() {
+npmStats.queryDatabase = function(callback) {
+  if(Object.keys(npmStats.registry_data).length === 0) {
     console.log('Querying Information: please wait one moment');
     registry.request({
       'method': 'GET',
@@ -18,61 +17,74 @@ module.exports = function() {
           console.log(error);
         }
         else{
-          self.registry_data = monthHash(response);
+          npmStats.registry_data = response;
+          callback(response);
         }
       }
     });
-  };
-
-  this._sortRegistryHash = function() {
-    var modulesByDate = [];
-    Object.keys(this.registry_data).forEach(function(module) {
-       modulesByDate.push(this.registry_data[module]);
-    });
-     self.sorted_by_date = sorted(modulesByDate, compareDate);
-  };
-
-  this.calculateGrowthPerMonth = function() {
-    var calculation = {};
-    var total = 0;
-    _sortRegistryHash();
-    sorted_by_date.forEach(function(date) {
-      var calcualtedDate = date.getMonthName() + "-" + date.getUTCFullYear();
-      if(calculation[calcualtedDate] === undefined) {
-        calculation[calcualtedDate] = (1 + total);
-      }
-      else {
-        calculation[calcualtedDate] = calculation[calcualtedDate] + 1;
-      }
-      total = total + 1;
-    });
-    return calculation;
-  };
-
-  queryDatabase();
-  return this;
+  }
+  else {
+    callback(npmStats.registry_data);
+  }
 };
 
-function monthHash(response) {
-  var registry_data = {};
+npmStats.getByMonth = function() {
+  npmStats.queryDatabase(npmStats._growthByMonth);
+};
+
+npmStats._growthByMonth = function(data) {
+  var response = npmStats._calculateGrowthPerMonth(
+    npmStats._sortRegistryHash(
+      npmStats._monthHash(data)
+    )
+  );
+  npmStats.output = response;
+  console.log(response);
+};
+
+npmStats._sortRegistryHash = function(data) {
+  var modulesByDate = [];
+  Object.keys(data).forEach(function(module) {
+     modulesByDate.push(data[module]);
+  });
+   return sorted(modulesByDate, compareDate);
+};
+
+npmStats._calculateGrowthPerMonth = function(data) {
+  var calculation = {};
+  var total = 0;
+  data.forEach(function(date) {
+    var calcualtedDate = date.getMonthName() + "-" + date.getUTCFullYear();
+    if(calculation[calcualtedDate] === undefined) {
+      calculation[calcualtedDate] = (1 + total);
+    }
+    else {
+      calculation[calcualtedDate] = calculation[calcualtedDate] + 1;
+    }
+    total = total + 1;
+  });
+  return calculation;
+};
+
+npmStats._monthHash = function(response) {
+  var hash = {};
   response.rows.forEach( function(row) {
     if(row.doc !== undefined) {
       if(row.doc.time === undefined) {
         if(row.doc.ctime !== undefined){
-          registry_data[row.doc.name] = new Date(row.doc.ctime.replace(/T.*/, ''));
+          hash[row.doc.name] = new Date(row.doc.ctime.replace(/T.*/, ''));
         }
         else {
           console.log(row.doc.name);
         }
       }
       else {
-        registry_data[row.doc.name] = new Date(row.doc.time.created.replace(/T.*/, ''));
+        hash[row.doc.name] = new Date(row.doc.time.created.replace(/T.*/, ''));
       }
     }
   });
-  console.log('finished dumping data');
-  return registry_data;
-}
+  return hash;
+};
 
 function compareDate (a, b) {
   return a.compareTo(b);

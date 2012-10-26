@@ -3,6 +3,7 @@
     "description": "Get simple states about NPM straight from the couchdb",
     "version": "0.5.0",
     "author": "Matthew Bergman",
+    "email": "matt@novafabrica",
     "keywords": [
         "npm",
         "search"
@@ -11,7 +12,7 @@
         "type": "git",
         "url": "http://github.com/FotoVerite/npm_stats.git"
     },
-    "main": "./npm_stats",
+    "main": "./index.js",
     "engines": {
         "node": ">=0.6"
     },
